@@ -9,6 +9,14 @@ import numpy as np
 import scipy.optimize
 import scipy.stats
 
+try:
+    # Try to be nice and work with OLD python 2
+    # Python 2 forward compatibility
+    range = xrange
+except NameError:
+    pass
+
+
 
 def enum(**enums):
     return type('Enum', (), enums)
@@ -137,7 +145,7 @@ class Option(Instrument):
         def divs_pv(n):
             if not hasattr(self.yield_, '__call__'): return 0
             pv_divs = 0
-            for step_num in xrange(n, val_num_steps):
+            for step_num in range(n, val_num_steps):
                 div_t1, div_t2 = dt * step_num, dt * (step_num + 1)
                 div = self.yield_(div_t1, div_t2)
                 if is_number(div):
@@ -210,11 +218,11 @@ class Option(Instrument):
 
         def cast_spot_paths():
             result = np.empty([val_num_paths, val_num_steps])
-            for path_num in xrange(val_num_paths):
+            for path_num in range(val_num_paths):
                 result1 = np.empty([val_num_steps])
                 spot = self.spot0
                 result1[0] = spot
-                for step_num in xrange(1, val_num_steps):
+                for step_num in range(1, val_num_steps):
                     spot *= exp(drift + self.vol * np.random.normal() * sqrt_dt)
                     if hasattr(self.yield_, '__call__'):
                         div_t1, div_t2 = dt * step_num, dt * (step_num + 1)
@@ -227,7 +235,7 @@ class Option(Instrument):
 
         def step_exercise_profits(spot_paths, step_num):
             exer_profits = np.empty([val_num_paths])
-            for path_num in xrange(val_num_paths):
+            for path_num in range(val_num_paths):
                 spot = spot_paths[path_num, step_num]
                 if self.opt_type == OptionType.CALL:
                     exer_profit = max(0, spot - self.strike)
@@ -254,10 +262,10 @@ class Option(Instrument):
                 return exp(-self.riskless_rate * (dt * max_step_num)) * max_cashflow
 
             step_models = [None] * val_num_steps
-            for step_num in xrange(val_num_steps - 2, -1, -1):
+            for step_num in range(val_num_steps - 2, -1, -1):
                 exer_profits = step_exercise_profits(spot_paths, step_num)
                 xs, ys = [], []
-                for path_num in xrange(val_num_paths):
+                for path_num in range(val_num_paths):
                     if exer_profits[path_num] <= 0: continue
                     xs += [spot_paths[path_num, step_num]]
                     cont_val = cashflow_path_pv(path_num, step_num + 1)
@@ -268,7 +276,7 @@ class Option(Instrument):
                 [x_coeff, x_sq_coeff, int_coeff] = np.linalg.lstsq(np.transpose(np.array(basis_xs)), ys)[0]
                 step_models[step_num] = [x_coeff, x_sq_coeff, int_coeff]
 
-                for path_num in xrange(val_num_paths):
+                for path_num in range(val_num_paths):
                     exer_profit = exer_profits[path_num]
                     if exer_profit <= 0: continue
                     spot = spot_paths[path_num, step_num]
@@ -279,7 +287,7 @@ class Option(Instrument):
                         cashflow_paths[path_num, (step_num + 1):] = 0
 
             pvs = []
-            for path_num in xrange(val_num_paths):
+            for path_num in range(val_num_paths):
                 step_num = cashflow_paths[path_num].argmax()
                 cashflow = cashflow_paths[path_num][step_num]
                 pvs += [exp(-self.riskless_rate * (dt * step_num)) * cashflow]
