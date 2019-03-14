@@ -21,7 +21,7 @@ test_requirements = [
 
 setup(
     name='pyfin',
-    version='0.1.0',
+    version='0.3.0',
     description='Python finance',
     long_description=readme + '\n\n' + history,
     author='Ben Gimpert',
