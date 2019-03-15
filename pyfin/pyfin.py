@@ -273,7 +273,7 @@ class Option(Instrument):
                 if len(xs) == 0: continue
 
                 basis_xs = [xs, np.multiply(xs, xs), [1] * len(xs)]
-                [x_coeff, x_sq_coeff, int_coeff] = np.linalg.lstsq(np.transpose(np.array(basis_xs)), ys)[0]
+                [x_coeff, x_sq_coeff, int_coeff] = np.linalg.lstsq(np.transpose(np.array(basis_xs)), ys, rcond=-1)[0]
                 step_models[step_num] = [x_coeff, x_sq_coeff, int_coeff]
 
                 for path_num in range(val_num_paths):
